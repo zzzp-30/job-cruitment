@@ -206,6 +206,13 @@ class InvitationJobSerializer(serializers.ModelSerializer):
 
 from rest_framework.generics import get_object_or_404
 
+from rest_framework import serializers
+from apps.job.models import Invitation, Job, Interview
+from apps.peekpauser.models import User
+from rest_framework.generics import get_object_or_404
+from django.utils import timezone
+import datetime  # 确保导入 datetime
+
 class InvitationSerializer(serializers.ModelSerializer):
     candidate = CandidateSerializer(read_only=True)
     job = serializers.SerializerMethodField()
@@ -215,7 +222,17 @@ class InvitationSerializer(serializers.ModelSerializer):
     def get_job(self, obj):
         job = Job.objects.get(interviews__invitations__id=obj.id)
         return InvitationJobSerializer(job).data
-    # 新添加的方法
+
+    def validate(self, data):
+        """
+        在验证阶段自动设置 due_time = publish_time + 3天
+        注意：publish_time 由 auto_now_add=True 自动设置，但此时还未保存，所以用当前时间
+        """
+        # 使用当前时间作为 publish_time 的近似值
+        now = timezone.now()
+        data['due_time'] = now + datetime.timedelta(days=3)
+        return data
+
     def create(self, validated_data):
         request = self.context.get('request')
         url_kwargs = self.context.get('view').kwargs
@@ -227,19 +244,25 @@ class InvitationSerializer(serializers.ModelSerializer):
         interview = get_object_or_404(Interview, id=interview_id)
         user = User.objects.get(uid=user_uid)
         interviewer = request.user
+
+        # 创建邀请，publish_time 会由 auto_now_add 自动设置
         invitation = Invitation.objects.create(
             interview=interview,
             candidate=user,
             interviewer=interviewer,
-            **validated_data
+            **validated_data  # due_time 已在 validate 中设置
         )
         return invitation
 
     class Meta:
         model = Invitation
-        fields = ['message', 'response', 'candidate', 'publish_time', 'due_time', 'job', 'user_uid', 'update_time',
-                  'status']
-        read_only_fields = ['response', 'publish_time', 'due_time', 'candidate', 'job', 'update_time']
+        fields = [
+            'message', 'response', 'candidate', 'publish_time', 'due_time',
+            'job', 'user_uid', 'update_time', 'status'
+        ]
+        read_only_fields = [
+            'response', 'publish_time', 'due_time', 'candidate', 'job', 'update_time'
+        ]
 
 class CompanyListSerializer(serializers.ModelSerializer):
     jobs = serializers.SerializerMethodField()

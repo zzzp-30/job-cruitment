@@ -75,7 +75,7 @@ class Invitation(models.Model):
     response = models.PositiveIntegerField(default=RESPONSE_UNRESPONSE, choices=RESPONSE_ITEMS)
     publish_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
-    due_time = models.DateTimeField(default=F('publish_time') + timedelta(days=3))
+    due_time = models.DateTimeField() 
 
     def save(self, *args, **kwargs):
         self.update_time = timezone.now()  # 在保存模型时更新 update_time 字段

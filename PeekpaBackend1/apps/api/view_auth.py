@@ -238,3 +238,22 @@ class CompanyProfileView(generics.RetrieveUpdateAPIView):
             company.save()
         serializer = self.get_serializer(company)
         return Response(data=serializer.data)
+    
+from rest_framework.views import APIView
+from apps.api.authentications import PeekpaAccessToken
+from rest_framework_simplejwt.exceptions import TokenError
+
+class LogoutView(APIView):
+    queryset = User.objects.filter(is_staff=False)
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        if hasattr(request, 'auth') and request.auth and isinstance(request.auth, PeekpaAccessToken):
+            try:
+                request.auth.blacklist()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except TokenError:
+                return Response(status=status.HTTP_400_BAD_REQUEST, data="bad token")
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)

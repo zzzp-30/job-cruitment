@@ -22,6 +22,7 @@ from apps.api.view_company import CompanyDetailView
 from apps.api.view_index import IndexView
 from apps.api.view_auth import ProfileView
 from apps.api.view_auth import CompanyProfileView
+from apps.api.view_auth import LogoutView
 
 urlpatterns = [
     path("auth/signin/", LoginView.as_view(), name='signin_view'),
@@ -49,6 +50,7 @@ urlpatterns = [
     path("index/", IndexView.as_view(), name='index'), # 首页接口
     path("profile/", ProfileView.as_view(), name="profile_user"), # 个人信息修改接口
     path("manage/setting/", CompanyProfileView.as_view(), name="company_profile_user"),
+    path("auth/logout/", LogoutView.as_view(), name='logout'),  # 登出接口
 ]
 
 app_name = "api"

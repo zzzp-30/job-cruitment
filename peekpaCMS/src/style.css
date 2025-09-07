@@ -1,0 +1,26 @@
+:root {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  --vt-banner-height: 0px;
+  --main-width: 1200px;
+
+  --theme-one-color: #222831;
+  --theme-two-color: #393E46;
+  --theme-three-color: #FFD369;
+  --theme-four-color: #EEEEEE;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#app,
+.wrapper {
+  width: 100%;
+  height: 100%;
+}
